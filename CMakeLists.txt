@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.27)
 # ##############################################################################
 # Edit your MCU information up to the next border
-project(NUCLEOF4_BOOTLOADER)
+project(Automotive_BOOTLOADER)
 set(PROJECT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/PROJECT)
 
 set(MCU_FAMILY STM32F4xx)
@@ -14,7 +14,7 @@ set(CPU_PARAMETERS
     -mfloat-abi=hard
   )
 
-set(STARTUP_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/startup_stm32f446retx.s)
+set(STARTUP_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/Core/Startup/startup_stm32f446retx.s)
 set(MCU_LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/STM32F446RETX_FLASH.ld)
 # ##############################################################################
 set(EXECUTABLE ${CMAKE_PROJECT_NAME})

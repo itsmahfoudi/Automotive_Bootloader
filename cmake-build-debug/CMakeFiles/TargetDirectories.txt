@@ -1,0 +1,3 @@
+/home/itsmeayoub/Documents/AYOUB/SigmaEmbedded/Automotive_Bootloader/cmake-build-debug/CMakeFiles/Automotive_BOOTLOADER.dir
+/home/itsmeayoub/Documents/AYOUB/SigmaEmbedded/Automotive_Bootloader/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/itsmeayoub/Documents/AYOUB/SigmaEmbedded/Automotive_Bootloader/cmake-build-debug/CMakeFiles/rebuild_cache.dir
