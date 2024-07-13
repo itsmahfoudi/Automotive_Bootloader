@@ -27,7 +27,8 @@ set(CUBEMX_INCLUDE_DIRECTORIES
     ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/${MCU_FAMILY}_HAL_Driver/Inc/Legacy
     ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS/Device/ST/${MCU_FAMILY}/Include
     ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS/Include
-)
+    ${CMAKE_CURRENT_SOURCE_DIR}/Crypto/Inc 
+    )
 set(PROJECT_INCLUDE_DIRECTORIES 
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_DIR}) 
@@ -54,11 +55,15 @@ set(STM32CUBEMX_SOURCES
     Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c
     Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c
     Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ramfunc.c
+    Crypto/aes.c 
+    Crypto/cmac.c 
+    Crypto/Utils.c
   )
 
 file(GLOB_RECURSE STM32CUBEMX_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/*.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/*.c 
+    ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/*.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Crypto/*.c 
    )
 file(GLOB_RECURSE PROJECT_SOURCES FOLLOW_SYMLINKS
     ${PROJECT_DIR}/*.cpp
