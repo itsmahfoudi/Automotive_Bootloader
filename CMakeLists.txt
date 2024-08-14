@@ -86,12 +86,14 @@ set(STM32CUBEMX_INCLUDE_DIRECTORIES
     ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS/Device/ST/${MCU_FAMILY}/Include
     ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS/Include
     ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/BSP/STM32H7xx_Nucleo
+    ${CMAKE_CURRENT_SOURCE_DIR}/Crypto/Inc
     )
 
 file(GLOB_RECURSE STM32CUBEMX_SOURCES CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/Common/*.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/*.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/BSP/STM32H7xx_Nucleo/*.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Crypto/Src/*.c
 )
 
 # ##############################################################################
