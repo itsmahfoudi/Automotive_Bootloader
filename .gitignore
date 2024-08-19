@@ -5,3 +5,4 @@ generated.*.ld
 build/
 .cache/
 ./cmake-build-debug/
+./.cache/
