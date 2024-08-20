@@ -16,8 +16,10 @@
   */
 
 #include "BootManager_FSM.h"
-//#include "hashcheck.h"
+#include <string.h>
 
+
+uint8_t crypt_key[16] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
 Boot_Manager_State  State = State_Init;
 pFunction JumpToApplication;
 
@@ -69,7 +71,7 @@ void BootManager_FSM(void){
       if(ProgRequest_Check()){
         State = State_copy_jump_FW; // Copy FBL and Jump to it
       }else{
-        State = State_APP_Check;
+        State = State_CALIB_Check;
       }
       break;
     case State_copy_jump_FW :
@@ -82,13 +84,20 @@ void BootManager_FSM(void){
     case State_APP_Check :
       State = State_copy_jump_FW; // Copy APP and Jump to it
       if(APP_Check()){
-        Set_Target_FW(APP_LOAD_ADDRESS, APP_ENTRY_ADDRESS, APP_TARGET_ADDRESS);
+        Set_Target_FW(APP_START_ADDR, APP_ENTRY_ADDRESS, APP_TARGET_ADDRESS);
       }else{
-        Set_Target_FW(FBL_LOAD_ADDRESS, FBL_ENTRY_ADDRESS, FBL_TARGET_ADDRESS);
+        Set_Target_FW(FBL_START_ADDR, FBL_ENTRY_ADDRESS, FBL_TARGET_ADDRESS);
+      }
+      break;
+    case State_CALIB_Check:
+      if (CAL_Check()) {
+        State = State_APP_Check;
+      } else {
+        State = State_Error;
       }
       break;
     case State_Error :
-      while(1);
+      Error_Handler();
       break;
   }
 }
@@ -111,49 +120,76 @@ void JumpToFW(void){
 }
 
 uint8_t FBL_Check(void){
-  uint32_t   File_Sig;
-  uint32_t   FBL_Size;
+  uint32_t   File_Sig; 
+  uint8_t mac_result[MAC_SIZE];
+  uint8_t expected_mac[MAC_SIZE];
 
-  ApplicationInfo * Appheader = (ApplicationInfo *) FBL_LOAD_ADDRESS;
-  File_Sig = Appheader->Signature;
+  ApplicationInfo * FblHeader = (ApplicationInfo *) FBL_START_ADDR;
+  File_Sig = FblHeader->Signature;
 
-  /* 1 - Check Signature */
+  // 1 - Check Signature
   if(File_Sig != SIG_PBL){
     return 0;
   }
+
+  // Load expected MAC from the last 16 bytes of the FBL section
+  memcpy(expected_mac, (uint8_t*)(FBL_START_ADDR + FBL_SECTION_SIZE - MAC_SIZE), MAC_SIZE);
   
-  /* 2 - Check Hash */
-#if Hash_Check  
-  FBL_Size = Appheader->Size;
+  // Calculate MAC over the FBL section
+  aes_cmac((uint8_t*)FBL_START_ADDR, FBL_SECTION_SIZE - MAC_SIZE, mac_result, crypt_key);  
 
-  FW_Hash_Verify(FBL_LOAD_ADDRESS, FBL_Size);  
-#endif
-
-  return 1;
+  // Compare the calculated MAC with the expected MAC
+  if (memcmp(mac_result, expected_mac, MAC_SIZE) == 0) {
+    return 1;
+  }
+  return 0;
 }
 
 uint8_t APP_Check(void){
 
   uint32_t File_Sig;
-  uint32_t App_Size;
+  uint8_t mac_result[MAC_SIZE];
+  uint8_t expected_mac[MAC_SIZE];
 
-  ApplicationInfo * Appheader = (ApplicationInfo *) APP_LOAD_ADDRESS;
-  File_Sig = Appheader->Signature;
 
-  /* 1 - Check Signature */
+  ApplicationInfo * App_header = (ApplicationInfo *) APP_START_ADDR;
+  File_Sig = App_header->Signature;
+
+  // 1 - Check Signature
   if(File_Sig != SIG_APP){
     return 0;
   }
 
-  /* 2 - Check Hash */
-#if Hash_Check   
-  App_Size = Appheader->Size;
 
-  FW_Hash_Verify(APP_LOAD_ADDRESS, App_Size);
-#endif
+  // Load expected MAC from the last 16 bytes of the APP section
+  memcpy(expected_mac, (uint8_t*)(APP_START_ADDR + APP_SECTION_SIZE - MAC_SIZE), MAC_SIZE);
 
-  return 1;
+  // Calculate MAC over the APP section
+  aes_cmac((uint8_t*)APP_START_ADDR, APP_SECTION_SIZE - MAC_SIZE, mac_result, crypt_key);
+
+  // Compare the calculated MAC with the expected MAC
+  if (memcmp(mac_result, expected_mac, MAC_SIZE) == 0) {
+    return 1;
+  }
+
+  return 0;
 }
+
+uint8_t CAL_Check(void) {
+  uint8_t mac_result[MAC_SIZE];
+  uint8_t expected_mac[MAC_SIZE];
+  // Load expected MAC from the last 16 bytes of the CALIB section
+  memcpy(expected_mac, (uint8_t*)(CALIB_START_ADDR + CALIB_SECTION_SIZE - MAC_SIZE), MAC_SIZE);
+  
+  // Calculate MAC over the CALIB section
+  aes_cmac((uint8_t*)CALIB_START_ADDR, CALIB_SECTION_SIZE - MAC_SIZE, mac_result, crypt_key);
+  
+  // Compare the calculated MAC with the expected MAC
+  if (memcmp(mac_result, expected_mac, MAC_SIZE) == 0) {
+    return 1;
+  }
+  return 0;
+} 
 
 void Set_Target_FW(uint32_t LoadAddr, uint32_t JumpAddr, uint32_t TargetAddr){
 
@@ -168,8 +204,8 @@ uint32_t ProgRequest_Check(void){
   uint8_t IsFlag_Set = 0;
   //ProgrammingMode = ProgFlag;
   if (ProgrammingMode == ProgFlag){
-    Set_Target_FW(FBL_LOAD_ADDRESS, FBL_ENTRY_ADDRESS, FBL_TARGET_ADDRESS);
-    IsFlag_Set = (ProgrammingMode == ProgFlag);
+    Set_Target_FW(FBL_START_ADDR, FBL_ENTRY_ADDRESS, FBL_TARGET_ADDRESS);
+    IsFlag_Set = true;
     ProgrammingMode = 0;
   }
 

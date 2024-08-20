@@ -29,6 +29,7 @@ extern "C" {
 #include "Appinfo.h"
 #include "memory.h"
 #include "main.h"
+#include "cmac.h"
 #include "stm32h7xx_hal.h"
 
 typedef enum _Boot_Manager_State{
@@ -37,6 +38,7 @@ typedef enum _Boot_Manager_State{
   State_ProgRequest_Check,
   State_copy_jump_FW,
   State_APP_Check,
+  State_CALIB_Check,
   State_Error
 }Boot_Manager_State;
 
@@ -45,6 +47,7 @@ typedef  void (*pFunction)(void);
 void BootManager_FSM(void);
 uint8_t FBL_Check(void);
 uint8_t APP_Check(void);
+uint8_t CAL_Check(void);
 uint32_t ProgRequest_Check(void);
 void Set_Target_FW(uint32_t LoadAddr, uint32_t JumpAddr, uint32_t TargetAddr);
 void JumpToFW(void);

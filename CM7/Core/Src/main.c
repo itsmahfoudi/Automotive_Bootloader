@@ -19,8 +19,6 @@
 #include "memory.h"
 #include "BootManager_FSM.h"
 
-
-
 uint32_t ProgrammingMode;
 uint32_t JumpAddress;
 uint32_t LoadAddress;

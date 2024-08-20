@@ -34,7 +34,7 @@ extern "C" {
 #define TYPE_FBL  2 
 #define ProgFlag  0xAA55AA55
 
-typedef struct _ApplicationInfo {
+typedef struct _ApplicationInfo{
     uint32_t      Signature;     
     uint8_t       type;          
     uint8_t       version;       
@@ -42,18 +42,9 @@ typedef struct _ApplicationInfo {
     uint8_t       hwModel; 
     uint32_t      StartAdd;
     uint32_t      Size;      
-} ApplicationInfo;
+}ApplicationInfo;
 
-ApplicationInfo const
-AppHeader __attribute__((section(".AppInfoBlock"))) = {
-  .Signature      = SIG_BTM,
-  .type           = TYPE_BTM,
-  .version        = 1,
-  .name           = "Boot Manager",
-  .hwModel        = 1,
-  .StartAdd       = 0x8000000,  // To be filled after
-  .Size           = 128*1024,   // To be filled after
-};
+
 
 #ifdef __cplusplus
 }

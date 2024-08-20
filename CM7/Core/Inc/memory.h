@@ -125,10 +125,19 @@
 #define APP_TARGET_ADDRESS ((uint32_t)0xD0100000)
 #define FBL_ENTRY_ADDRESS  ((uint32_t)0xD0000200) 
 #define APP_ENTRY_ADDRESS  ((uint32_t)0xD0100200)
-#define FBL_LOAD_ADDRESS   ((uint32_t)0x90000000) 
-#define APP_LOAD_ADDRESS   ((uint32_t)0x90100000)
-#define FBL_SIZE           0x100000
-#define APP_SIZE           0x300000
+//#define FBL_LOAD_ADDRESS   ((uint32_t)0x90000000) 
+//#define APP_LOAD_ADDRESS   ((uint32_t)0x90100000)
+
+
+// Addresses of different sections in flash
+#define FBL_START_ADDR        0x08020000
+#define APP_START_ADDR        0x0809D000
+#define CALIB_START_ADDR      0x080DF400
+
+// Size of different sections in memory
+#define FBL_SECTION_SIZE      0x7D000      
+#define APP_SECTION_SIZE      0x42400
+#define CALIB_SECTION_SIZE    0x10000
 
 
 #define SRAM_DEVICE_ADDR   ((uint32_t)0x68000000)

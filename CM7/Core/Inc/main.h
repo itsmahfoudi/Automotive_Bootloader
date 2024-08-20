@@ -25,6 +25,12 @@ extern "C" {
 
 #include "stm32h7xx_hal.h"
 
+
+// Mac value size 
+#define MAC_SIZE              16
+
+
+
 void Error_Handler(void);
 void SystemClock_Config(void);
 void PeriphCommonClock_Config(void);
