@@ -4,5 +4,6 @@ bin/
 generated.*.ld
 build/
 .cache/
-./cmake-build-debug/
-./.cache/
+cmake-build-debug/
+.cache/
+.idea/
