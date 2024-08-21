@@ -87,13 +87,22 @@ set(STM32CUBEMX_INCLUDE_DIRECTORIES
     ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS/Include
     ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/BSP/STM32H7xx_Nucleo
     ${CMAKE_CURRENT_SOURCE_DIR}/Crypto/Inc
-    )
+    ${CMAKE_CURRENT_SOURCE_DIR}/STM32_Cryptographic/include 
+    ${CMAKE_CURRENT_SOURCE_DIR}/STM32_Cryptographic/include/drbg 
+    ${CMAKE_CURRENT_SOURCE_DIR}/STM32_Cryptographic/include/ecc 
+    ${CMAKE_CURRENT_SOURCE_DIR}/STM32_Cryptographic/include/mac 
+    ${CMAKE_CURRENT_SOURCE_DIR}/STM32_Cryptographic/include/cipher 
+    ${CMAKE_CURRENT_SOURCE_DIR}/STM32_Cryptographic/include/utils 
+    ${CMAKE_CURRENT_SOURCE_DIR}/STM32_Cryptographic/include/rsa 
+    ${CMAKE_CURRENT_SOURCE_DIR}/STM32_Cryptographic/include/hash 
+)
 
 file(GLOB_RECURSE STM32CUBEMX_SOURCES CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/Common/*.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/*.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/BSP/STM32H7xx_Nucleo/*.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Crypto/Src/*.c
+    ${CMAKE_CURRENT_SOURCE_DIR} ./STM32_Cryptographic/interface/*.c
 )
 
 # ##############################################################################
@@ -123,6 +132,10 @@ target_link_options(${CM4_EXE} PRIVATE
     -Wl,-Map=${CM4_EXE}.map
     ${CM4_CPU_PARAMETERS})
 
+# link_directories(${CMAKE_CURRENT_SOURCE_DIR}/STM32_Cryptographic/lib) 
+
+target_link_libraries(${CM4_EXE} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/STM32_Cryptographic/lib/libSTM32Cryptographic_CM4.a)
+
 # CM7
 file(GLOB_RECURSE CM7_SOURCES CONFIGURE_DEPENDS
     ${CM7_dir}/Core/*.c)
@@ -149,6 +162,9 @@ target_link_options(${CM7_EXE} PRIVATE
     -Wl,-Map=${CM7_EXE}.map
     ${CM7_CPU_PARAMETERS})
 
+# link_directories(${CMAKE_CURRENT_SOURCE_DIR}/STM32_Cryptographic/lib) 
+
+target_link_libraries(${CM7_EXE} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/STM32_Cryptographic/lib/libSTM32Cryptographic_CM7.a)
 # ##############################################################################
 
 function(make_output EXECUTABLE)
