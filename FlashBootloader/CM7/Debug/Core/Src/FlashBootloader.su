@@ -1,0 +1,9 @@
+../../Drivers/CMSIS/Include/core_cm7.h:2156:34:__NVIC_SystemReset	4	static,ignoring_inline_asm
+../Core/Src/FlashBootloader.c:191:19:Copy_FW_To_Flash	16	static
+../Core/Src/FlashBootloader.c:33:6:FlashBootloader_Main	8	static
+../Core/Src/FlashBootloader.c:100:19:FBL_Periph_Init	16	static
+../Core/Src/FlashBootloader.c:151:19:App_Sector_Erase	16	static
+../Core/Src/FlashBootloader.c:172:19:Extract_Sig	8	static
+../Core/Src/FlashBootloader.c:180:19:Receive_FW	16	static
+../Core/Src/FlashBootloader.c:209:19:FW_Auth_Verify	16	static
+../Core/Src/FlashBootloader.c:224:19:Calculate_And_Store_MAC	56	static

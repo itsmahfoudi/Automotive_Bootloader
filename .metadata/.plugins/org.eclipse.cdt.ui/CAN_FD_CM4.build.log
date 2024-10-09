@@ -1,0 +1,10 @@
+22:22:05 **** Incremental Build of configuration Debug for project CAN_FD_CM4 ****
+make -j8 all 
+arm-none-eabi-size  CAN_FD_CM4.elf 
+   text	   data	    bss	    dec	    hex	filename
+   3148	     16	   1568	   4732	   127c	CAN_FD_CM4.elf
+Finished building: default.size.stdout
+ 
+
+22:22:05 Build Finished. 0 errors, 0 warnings. (took 422ms)
+

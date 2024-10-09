@@ -1,0 +1,10 @@
+01:20:43 **** Incremental Build of configuration Debug for project EEPROM_TEST_CM7 ****
+make -j8 all 
+arm-none-eabi-size  EEPROM_TEST_CM7.elf 
+   text	   data	    bss	    dec	    hex	filename
+  30680	    140	   2260	  33080	   8138	EEPROM_TEST_CM7.elf
+Finished building: default.size.stdout
+ 
+
+01:20:44 Build Finished. 0 errors, 0 warnings. (took 306ms)
+

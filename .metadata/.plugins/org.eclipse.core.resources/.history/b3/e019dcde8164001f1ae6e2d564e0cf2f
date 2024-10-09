@@ -1,0 +1,250 @@
+/**
+  ******************************************************************************
+  * @file           : BootManager_FSM.c
+  * @brief          : Boot Manager FSM
+  ******************************************************************************
+  * @attention
+  *
+  * Copyright (c) 2024 Sigma Embedded.
+  * All rights reserved.
+  *
+  ******************************************************************************/
+
+#include "BootManager_FSM.h"
+#include "BootUpdater.h"
+#include <string.h>
+#include "main.h"
+
+uint8_t crypt_key[16] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+Boot_Manager_State  State = State_Init;
+pFunction JumpToApplication;
+
+// Private Function declaration
+void Initialize(void);
+void APP_Check_Fails(void);
+void FBL_Check_Fails(void);
+void CAL_Check_Fails(void);
+
+
+// BootManager_FSM implementation
+void BootManager_FSM(void){
+
+  switch(State) {
+
+    	case State_Init :
+    		Initialize();
+    		State = State_FBLCheck;
+
+    	case State_FBLCheck :
+    		if(FBL_Check()){
+    			State = State_ProgRequest_Check;
+    		}else{
+    			FBL_Check_Fails();
+    		}
+    		break;
+
+    	case State_ProgRequest_Check :
+    		if(ProgRequest_Check()){
+    			// Call FBL To update the APP
+    			FBL_Start();
+    		}else{
+    			State = State_CALIB_Check;
+    		}
+    		break;
+
+    	case State_APP_Check :
+
+    		if(APP_Check()){
+
+    			JumpToFW();
+    		}else{
+    			//Indicate integrity check fails
+    			APP_Check_Fails();
+    			// Call Flash Bootloader.
+    			FBL_Start();
+    		}
+    		break;
+
+
+    	case State_CALIB_Check:
+    		if (CAL_Check()) {
+    			State = State_APP_Check;
+    		} else {
+    			//Indicate integrity check fails
+    			CAL_Check_Fails();
+    			// Call Flash BootLoader
+    			FBL_Start();
+    		}
+    		break;
+
+  }
+}
+
+void Initialize(void) {
+	int32_t timeout;
+
+	/* USER CODE BEGIN Boot_Mode_Sequence_1 */
+	  /* Wait until CPU2 boots and enters in stop mode or timeout*/
+	  timeout = 0xFFFF;
+	  while((__HAL_RCC_GET_FLAG(RCC_FLAG_D2CKRDY) != RESET) && (timeout-- > 0));
+	  if ( timeout < 0 )
+	  {
+	  Error_Handler();
+	  }
+	/* MCU Configuration--------------------------------------------------------*/
+
+	  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+	  HAL_Init();
+
+	  /* Configure the system clock */
+	  SystemClock_Config();
+	/* USER CODE BEGIN Boot_Mode_Sequence_2 */
+	/* When system initialization is finished, Cortex-M7 will release Cortex-M4 by means of
+	HSEM notification */
+	/*HW semaphore Clock enable*/
+	__HAL_RCC_HSEM_CLK_ENABLE();
+	/*Take HSEM */
+	HAL_HSEM_FastTake(HSEM_ID_0);
+	/*Release HSEM in order to notify the CPU2(CM4)*/
+	HAL_HSEM_Release(HSEM_ID_0,0);
+	/* wait until CPU2 wakes up from stop mode */
+	timeout = 0xFFFF;
+	while((__HAL_RCC_GET_FLAG(RCC_FLAG_D2CKRDY) == RESET) && (timeout-- > 0));
+	if ( timeout < 0 )
+	{
+	Error_Handler();
+	}
+	/* USER CODE END Boot_Mode_Sequence_2 */
+
+	  /* USER CODE BEGIN SysInit */
+
+	  /* USER CODE END SysInit */
+
+	  /* Initialize all configured peripherals */
+	  MX_GPIO_Init();
+	  MX_FDCAN1_Init();
+	  MX_FDCAN2_Init();
+	  MX_USART3_UART_Init();
+
+	  BSP_LED_Init(LED_GREEN);
+	  BSP_LED_Init(LED_RED);
+}
+
+void JumpToFW(void){
+
+	/* Disable Systick interrupt */
+	__disable_irq();
+	SysTick->CTRL &= ~SysTick_CTRL_TICKINT_Msk;
+
+	/* Initialize user application's Stack Pointer & Jump to user application */
+	JumpAddress = (uint32_t)APP_START_ADDR;
+	JumpToApplication = (pFunction) (*(__IO uint32_t*) (JumpAddress + 4));
+
+	__set_MSP(*(__IO uint32_t*) JumpAddress);
+	__DSB();
+	__DMB();
+	__ISB();
+	//while(1);
+	JumpToApplication();
+}
+
+uint8_t FBL_Check(void){
+
+	uint8_t mac_result[MAC_SIZE];
+	uint8_t expected_mac[MAC_SIZE];
+
+	// Load expected MAC from the last 16 bytes of the FBL section
+	memcpy(expected_mac, (uint8_t*)(FBL_START_ADDR + FBL_SECTION_SIZE - MAC_SIZE), MAC_SIZE);
+  
+	// Calculate MAC over the FBL section
+	//aes_cmac((uint8_t*)FBL_START_ADDR, FBL_SECTION_SIZE - MAC_SIZE, mac_result, crypt_key);
+
+	// Compare the calculated MAC with the expected MAC
+	memset(mac_result, 0, MAC_SIZE);
+	if (memcmp(mac_result, expected_mac, MAC_SIZE) == 0) {
+		return 1;
+	}
+	return 0;
+}
+
+uint8_t APP_Check(void){
+
+	uint8_t mac_result[MAC_SIZE];
+	uint8_t expected_mac[MAC_SIZE];
+
+
+	// Load expected MAC from the last 16 bytes of the APP section
+	memcpy(expected_mac, (uint8_t*)(APP_START_ADDR + APP_SECTION_SIZE - MAC_SIZE), MAC_SIZE);
+
+	// Calculate MAC over the APP section
+	//aes_cmac((uint8_t*)APP_START_ADDR, APP_SECTION_SIZE - MAC_SIZE, mac_result, crypt_key);
+
+	// Compare the calculated MAC with the expected MAC
+	if (memcmp(mac_result, expected_mac, MAC_SIZE) == 0) {
+		return 1;
+	}
+
+	return 0;
+}
+
+uint8_t CAL_Check(void) {
+	uint8_t mac_result[MAC_SIZE];
+	uint8_t expected_mac[MAC_SIZE];
+
+	// Load expected MAC from the last 16 bytes of the CALIB section
+	memcpy(expected_mac, (uint8_t*)(CALIB_START_ADDR + CALIB_SECTION_SIZE - MAC_SIZE), MAC_SIZE);
+  
+	// Calculate MAC over the CALIB section
+	//aes_cmac((uint8_t*)CALIB_START_ADDR, CALIB_SECTION_SIZE - MAC_SIZE, mac_result, crypt_key);
+  
+	// Compare the calculated MAC with the expected MAC
+	if (memcmp(mac_result, expected_mac, MAC_SIZE) == 0) {
+		return 1;
+	}
+	return 0;
+} 
+
+/* For this moment this function is not needed
+void Set_Target_FW(uint32_t LoadAddr, uint32_t JumpAddr, uint32_t TargetAddr){
+
+	LoadAddress   = LoadAddr;
+	JumpAddress   = JumpAddr;
+	TargetAddress = TargetAddr;
+}
+*/
+
+uint32_t ProgRequest_Check(void){
+
+  /* Choose the Entry Point */
+  uint8_t IsFlag_Set = FALSE;
+  //ProgrammingMode = ProgFlag;
+  if (ProgrammingMode == ProgFlag){
+    //Set_Target_FW(FBL_START_ADDR, FBL_ENTRY_ADDRESS, FBL_TARGET_ADDRESS);
+    IsFlag_Set = TRUE;
+    ProgrammingMode = 0;
+  }
+
+  return IsFlag_Set;
+}
+
+
+void APP_Check_Fails(void) {
+
+	printmsg("Application Integrity check has failed!!\n");
+
+}
+
+void FBL_Check_Fails(void) {
+
+	while(1) {
+		printmsg("BootUpdater Integrity check has failed!!\n");
+	}
+
+}
+void CAL_Check_Fails(void) {
+
+	while(1) {
+		printmsg("Calibration Integrity check has failed!!\n");
+	}
+
+}

@@ -1,0 +1,10 @@
+22:22:08 **** Incremental Build of configuration Debug for project ClassicCAN_CM7 ****
+make -j8 all 
+arm-none-eabi-size  ClassicCAN_CM7.elf 
+   text	   data	    bss	    dec	    hex	filename
+  26496	     52	   1940	  28488	   6f48	ClassicCAN_CM7.elf
+Finished building: default.size.stdout
+ 
+
+22:22:08 Build Finished. 0 errors, 0 warnings. (took 477ms)
+

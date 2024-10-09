@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;BootManager_CM7/Automotive_Bootloader_With_USD_CM7.launch&apos; to &apos;BootManager_CM7.launch&apos;" description="Rename resource &apos;Automotive_Bootloader_With_USD_CM7.launch&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="Automotive_Bootloader_With_USD_CM7.launch" name="BootManager_CM7.launch" stamp="1726336966838" updateReferences="true"/>
+</session>

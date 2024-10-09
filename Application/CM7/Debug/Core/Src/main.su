@@ -1,0 +1,9 @@
+../../Drivers/CMSIS/Include/core_cm7.h:2156:34:__NVIC_SystemReset	4	static,ignoring_inline_asm
+../Core/Src/main.c:82:5:main	8	static
+../Core/Src/main.c:153:6:SystemClock_Config	120	static
+../Core/Src/main.c:204:13:MX_USART2_UART_Init	8	static
+../Core/Src/main.c:252:13:MX_USART3_UART_Init	8	static
+../Core/Src/main.c:300:13:MX_GPIO_Init	16	static
+../Core/Src/main.c:314:6:HAL_UARTEx_RxEventCallback	16	static
+../Core/Src/main.c:333:6:printmsg	112	static
+../Core/Src/main.c:347:6:Error_Handler	4	static,ignoring_inline_asm

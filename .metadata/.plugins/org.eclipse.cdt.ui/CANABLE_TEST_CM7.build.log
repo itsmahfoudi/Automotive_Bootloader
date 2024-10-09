@@ -1,0 +1,10 @@
+23:22:19 **** Incremental Build of configuration Debug for project CANABLE_TEST_CM7 ****
+make -j8 all 
+arm-none-eabi-size  CANABLE_TEST_CM7.elf 
+   text	   data	    bss	    dec	    hex	filename
+  19368	     24	   1816	  21208	   52d8	CANABLE_TEST_CM7.elf
+Finished building: default.size.stdout
+ 
+
+23:22:22 Build Finished. 0 errors, 0 warnings. (took 2s.828ms)
+

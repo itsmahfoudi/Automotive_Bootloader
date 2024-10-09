@@ -1,0 +1,11 @@
+../Core/Src/BootManager_FSM.c:37:6:BootManager_FSM	8	static
+../Core/Src/BootManager_FSM.c:90:6:Initialize	8	static
+../Core/Src/BootManager_FSM.c:116:6:JumpToFW	16	static,ignoring_inline_asm
+../Core/Src/BootManager_FSM.c:133:9:FBL_Check	80	static
+../Core/Src/BootManager_FSM.c:157:9:APP_Check	64	static
+../Core/Src/BootManager_FSM.c:179:9:CAL_Check	64	static
+../Core/Src/BootManager_FSM.c:200:6:Set_Target_FW	24	static
+../Core/Src/BootManager_FSM.c:208:10:ProgRequest_Check	16	static
+../Core/Src/BootManager_FSM.c:227:6:APP_Check_Fails	16	static
+../Core/Src/BootManager_FSM.c:235:6:FBL_Check_Fails	16	static
+../Core/Src/BootManager_FSM.c:243:6:CAL_Check_Fails	16	static

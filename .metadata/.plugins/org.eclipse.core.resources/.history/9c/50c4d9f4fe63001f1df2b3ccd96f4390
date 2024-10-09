@@ -1,0 +1,16 @@
+/**
+  ******************************************************************************
+  * @file    hashcheck.c
+  * @brief   Header file of fw hash check module.
+  *          This file provides set of firmware functions to manage Common
+  *          functionalities.
+  ******************************************************************************
+  * @attention
+  *
+  * Copyright (c) 2024 Sigma Embedded.
+  * All rights reserved.
+  *
+  ******************************************************************************
+  */
+
+

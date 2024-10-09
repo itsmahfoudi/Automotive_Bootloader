@@ -1,0 +1,21 @@
+/* USER CODE BEGIN Header */
+/**
+  ******************************************************************************
+  * @file           : FlashBootloader.c
+  * @brief          : Source for FlashBootloader file.
+  *                   This file contains implementations of  declared functions
+  ******************************************************************************
+  * @attention
+  *
+  * Copyright (c) 2024 Sigma Embedded.
+  * All rights reserved.
+  *
+  ******************************************************************************/
+
+#include "FlashBootloader.h"
+#include <string.h>
+#include "main.h"
+#include "cmac_check.h"
+
+void FlashBootloader_Main(void);
+void FBL_Periph_Init(void);

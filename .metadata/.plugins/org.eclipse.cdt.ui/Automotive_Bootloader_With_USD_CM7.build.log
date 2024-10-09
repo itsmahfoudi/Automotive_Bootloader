@@ -1,0 +1,7 @@
+19:19:18 **** Build of configuration Debug for project Automotive_Bootloader_With_USD_CM7 ****
+make -j8 all 
+make: *** No rule to make target 'D:/ST_WorkSpace/Project/Automotive_Bootloader_With_USD/Automotive_Bootloader_With_USD/Automotive_Bootloader_With_USD/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal.c', needed by 'Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal.o'.  Stop.
+"make -j8 all" terminated with exit code 2. Build might be incomplete.
+
+19:19:18 Build Failed. 1 errors, 0 warnings. (took 275ms)
+
