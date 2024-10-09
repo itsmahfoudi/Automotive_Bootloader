@@ -1,3 +1,0 @@
-../Core/Src/hash_check.c:18:9:SHA256_HASH_Init	16	static
-../Core/Src/hash_check.c:26:9:SHA256_HASH_DigestCompute	40	static
-../Core/Src/hash_check.c:45:9:FW_Signature_Verify	1168	static

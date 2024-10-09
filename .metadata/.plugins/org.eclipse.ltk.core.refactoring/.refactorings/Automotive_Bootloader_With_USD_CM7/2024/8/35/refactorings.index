@@ -1,7 +1,0 @@
-1724685662004	Rename resource 'X-CUBE-EEPROM'
-1724688554363	Rename resource 'BootManager_FSM'
-1724690030504	Rename resource 'hashcheck.h'
-1724782680279	Move 'cmox_low_level_template.c' to 'Src'
-1724782705843	Rename resource 'cmox_low_level_template.c'
-1724788186660	Rename resource 'MAC_HASH_RET_VAL.h'
-1724812787348	Rename resource 'hashcheck.c'
