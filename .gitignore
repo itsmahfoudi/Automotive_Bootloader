@@ -7,3 +7,9 @@ build/
 cmake-build-debug/
 .cache/
 .idea/
+./Application/Drivers/*
+./Application/CM7/Debug/*
+./BootManager/Drivers/*
+./BootManager/CM7/Debug/*
+./FlashBootloader/Drivers/*
+./FlashBootloader/CM7/Debug/*
