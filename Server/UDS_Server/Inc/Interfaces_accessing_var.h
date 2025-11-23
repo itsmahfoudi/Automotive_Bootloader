@@ -30,15 +30,17 @@ extern SessionParameters sessionParameters;
 
 // this data structure is used to hold the parameters of the RequestDownload or RequestUpload Services
 typedef struct {
-unsigned int DownloadMemorySize;  // Memory Size K Bytes
-unsigned int DownloadStartAddr;   // Start Address 
+    unsigned int DownloadMemorySize;  // Memory Size K Bytes
+    unsigned int DownloadStartAddr;   // Start Address 
 }TransferRequestParameter;
 
 
 // Used to store the BlockSequence and 4 KBytes received on Communication Bus
 typedef struct {
-unsigned int blockSequence;
-unsigned int Data[1024]; // 4 KBytes 
+    unsigned int blockSequence;
+    unsigned int Data[1024]; // 4 KBytes 
+    //maybe we should declare as an array of chars, since we're manipulating bytes.
+    // unsigned char Data[4096];
 }TransferDataBuffer;
 
 typedef struct {

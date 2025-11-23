@@ -33,9 +33,11 @@ void DiagSessCntrl_MainFct( unsigned char*ReceivedFrame ){
 void SessionCnrtl_Init(unsigned char* ReceivedFrame){
     CopyDataBetwenTwoTables(tmpReceivedData , ReceivedFrame ); //  Copy the Received Data into a Local Variable 
     SetCurrentServiceID(tmpReceivedData[0]);            //  Set the Current Service ID to the var CurrentServiceID
+    //TODO: the SetCurrentServiceID macro or function is not defined!!!
 }
 
 unsigned char DiagCheckSubFunctionCode( unsigned char Sub_Fct_Code ){
+    //TODO: The following portion indicate that programming session is not supported?
     if(Sub_Fct_Code !=  FblDiagExtendedSession || Sub_Fct_Code != FblDiagStateDefaultSession ){
         return UDS_NOK;
     }
@@ -125,6 +127,7 @@ unsigned char  DiagSetResetHandlerAddr(unsigned char __layer ){
     }else{
         RESET_HANDLER_ADDR = BM_RESET_HANDLER_ADDR;
     }
+    //TODO: This one need more discussion!!
     reset_handler =*(void(*)(void))((volatile unsigned int*)RESET_HANDLER_ADDR);
     if(reset_handler != ((void*)0) ) {
         DiagSetResetHandAdrr(RESET_HANDLER_ADDR);

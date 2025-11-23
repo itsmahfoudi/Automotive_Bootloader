@@ -1,24 +1,23 @@
 from abc import ABC, abstractmethod
-from .UDSFrame import UDSFrame # Use relative import
+from UDSFrame import UDSFrame # Use relative import
 
 class UDSRequest(ABC):
     """Abstract base class for UDS service requests."""
     def __init__(self):
         self._sub_function: int | None = None
-        self._data = bytearray()
-        # service_id is now fetched via property from subclass
+        self._data = bytearray() 
 
     def set_sub_function(self, sub_function: int):
         """Sets the sub-function byte (if applicable)."""
         if not (0x00 <= sub_function <= 0xFF):
              raise ValueError("Sub-function must be a byte (0x00-0xFF)")
         self._sub_function = sub_function
-        return self # Allow chaining
+        return self 
 
     def add_data(self, data: bytes | bytearray | list[int]):
         """Adds data payload bytes."""
         self._data.extend(data)
-        return self # Allow chaining
+        return self
 
     @property
     @abstractmethod
@@ -29,11 +28,8 @@ class UDSRequest(ABC):
     def build_frame(self) -> UDSFrame:
         """Builds the UDSFrame for this request."""
         payload = bytearray()
-        if self._sub_function is not None:
-            # Ensure subfunction suppression bit (bit 7) is 0 if server doesn't expect it
-            # Assuming standard UDS where subfunction byte includes this bit if needed.
-            # Here, we assume server expects the raw subfunction value (0x01-0x7F)
-            payload.append(self._sub_function & 0x7F) # Mask out bit 7 just in case
+        if self._sub_function is not None: 
+            payload.append(self._sub_function & 0x7F) 
         payload.extend(self._data)
         return UDSFrame(service_id=self.service_id, data=payload)
 
@@ -53,8 +49,7 @@ class DiagnosticSessionControlRequest(UDSRequest):
     SESSION_EXTENDED = 0x03
 
     def __init__(self, session_type: int):
-        super().__init__()
-        # Server might implicitly support others, keep validation broad unless causing issues
+        super().__init__() 
         if not (0x00 <= session_type <= 0x7F): # Allow valid sub-function range
             raise ValueError(f"Invalid session type: {session_type}")
         self.set_sub_function(session_type)
@@ -79,7 +74,7 @@ class SecurityAccessRequest(UDSRequest):
              raise ValueError(f"Invalid security access level for single-level model. Use {self.REQUEST_SEED_LEVEL:#04x} (seed) or {self.SEND_KEY_LEVEL:#04x} (key).")
         self.set_sub_function(level)
         self.level = level
-        self.is_key_request = (level == self.SEND_KEY_LEVEL) # Track if it's a key request
+        self.is_key_request = (level == self.SEND_KEY_LEVEL) 
 
     def set_key(self, key: bytes | bytearray):
         """Sets the key data (only for SEND_KEY_LEVEL)."""
@@ -94,9 +89,8 @@ class SecurityAccessRequest(UDSRequest):
         return self.SERVICE_ID
 
 class RequestDownloadRequest(UDSRequest):
-    SERVICE_ID = 0x34
-    # Assuming implementation matches previous client definition
-    # Server code for 0x34 not provided, keep existing logic
+    SERVICE_ID = 0x34 
+
     def __init__(self, memory_address: int, memory_size: int, data_format: int = 0x00):
         super().__init__()
         addr_len = 4
@@ -114,13 +108,11 @@ class RequestDownloadRequest(UDSRequest):
 
 class TransferDataRequest(UDSRequest):
     SERVICE_ID = 0x36
-    # Assuming implementation matches previous client definition
-    # Server code for 0x36 not provided, keep existing logic
+
     def __init__(self, block_sequence_counter: int, data: bytes | bytearray):
         super().__init__()
         if not (0x00 <= block_sequence_counter <= 0xFF):
             raise ValueError("Block sequence counter must be a byte")
-        # Treat BSC as sub-function based on diagram/common practice
         self.set_sub_function(block_sequence_counter)
         self.add_data(data)
         self.block_sequence_counter = block_sequence_counter
@@ -130,8 +122,7 @@ class TransferDataRequest(UDSRequest):
         return self.SERVICE_ID
 
 class RequestTransferExitRequest(UDSRequest):
-    SERVICE_ID = 0x37
-    # Server code doesn't seem to use parameters, make it optional
+    SERVICE_ID = 0x37 
     def __init__(self, transfer_request_parameter: bytes | bytearray = b''):
         super().__init__()
         # No sub-function for 0x37
@@ -145,9 +136,9 @@ class ECUResetRequest(UDSRequest):
     """Represents an ECU Reset (0x11) request."""
     SERVICE_ID = 0x11
 
-    # Reset types supported by the provided server code
+    # Reset types supported by oussma's server implementation
     HARD_RESET = 0x01
-    # KEY_OFF_ON_RESET = 0x02 # Server code doesn't check for this
+    # KEY_OFF_ON_RESET = 0x02
     SOFT_RESET = 0x03
 
     def __init__(self, reset_type: int):
@@ -167,17 +158,17 @@ class RoutineControlRequest(UDSRequest):
     """Represents a Routine Control (0x31) request."""
     SERVICE_ID = 0x31
 
-    # Routine Control Types (Sub-functions) from server code
+    # Routine Control Types
     START_ROUTINE = 0x01
     STOP_ROUTINE = 0x02
     REQUEST_ROUTINE_RESULTS = 0x03
 
-    # Routine Identifiers from server code
+    # Routine Identifiers
     ERASING_MEM = 0xFF00
 
-    # Memory constraints from server code
-    MEM_START = 0x000000
-    MEM_END = 0x1FFFFF # Inclusive end address based on server check >= MEM_End
+    # Memory constraints
+    MEM_START = 0x08000000
+    MEM_END = 0x08200000 # 2MB Flash range
 
     def __init__(self, routine_control_type: int, routine_id: int):
         super().__init__()
@@ -206,10 +197,27 @@ class RoutineControlRequest(UDSRequest):
 
         # Add Address (3 bytes, Big Endian, relative to 0x08000000 but sent as offset)
         # Server expects offset: (RxData[4]<<16) | (RxData[5]<<8) | RxData[6]
-        self._data.extend(address.to_bytes(3, 'big'))
+        # We mask to 24 bits (assuming 0x08xxxxxx -> 0x00xxxxxx)
+        self._data.extend((address & 0xFFFFFF).to_bytes(3, 'big'))
         # Add Size (1 byte, in kB)
         self._data.append(size_kb)
         return self
+
+    @property
+    def service_id(self) -> int:
+        return self.SERVICE_ID
+
+class ReadDataByIDRequest(UDSRequest):
+    SERVICE_ID = 0x22
+
+    def __init__(self, data_identifier: int):
+        super().__init__()
+        if not (0x0000 <= data_identifier <= 0xFFFF):
+            raise ValueError(f"Invalid Data Identifier: {data_identifier:#04x}")
+        
+        # Add DID (2 bytes, Big Endian)
+        self._data.extend(data_identifier.to_bytes(2, 'big'))
+        self.data_identifier = data_identifier
 
     @property
     def service_id(self) -> int:

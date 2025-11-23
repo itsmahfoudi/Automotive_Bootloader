@@ -2,21 +2,20 @@ from enum import Enum
 import time
 
 # Use relative imports within the same package/folder structure
-from .Transport import Transport, TimeoutError # Assuming TimeoutError is raised by Transport
-from .UDSRequest import (
+from Transport import Transport
+from UDSRequest import (
     UDSRequest, DiagnosticSessionControlRequest, SecurityAccessRequest,
     RequestDownloadRequest, TransferDataRequest, RequestTransferExitRequest,
-    ECUResetRequest, RoutineControlRequest
+    ECUResetRequest, RoutineControlRequest, ReadDataByIDRequest
 )
-from .UDSResponse import UDSResponse
-from .UDSFrame import UDSFrame
+from UDSResponse import UDSResponse
+from UDSFrame import UDSFrame
 
 # Session supported types
 class SessionLevel(Enum):
     DEFAULT = DiagnosticSessionControlRequest.SESSION_DEFAULT
     PROGRAMMING = DiagnosticSessionControlRequest.SESSION_PROGRAMMING
     EXTENDED = DiagnosticSessionControlRequest.SESSION_EXTENDED
-    SAFETY = DiagnosticSessionControlRequest.SESSION_SAFETY # Keep defined
 
 # Simplified SecurityLevel Enum
 class SecurityLevel(Enum):
@@ -54,8 +53,6 @@ class UDSClient:
     def connect(self):
         """Connects the underlying transport. Assumes ECU starts in Default session."""
         self.transport.connect()
-        # No need to explicitly set default session, client assumes it starts there.
-        # Reset client state variables to assumed initial state upon connection
         self.current_session = SessionLevel.DEFAULT
         self.security_level = SecurityLevel.LOCKED
         print("Transport connected. Client state reset to assumed initial: DEFAULT/LOCKED.")
@@ -83,6 +80,7 @@ class UDSClient:
         original_sid = frame_to_send.service_id
 
         print(f"CLIENT SEND -> {frame_to_send}")
+        print(f"raw frame {raw_request_bytes}")
         self.transport.send(raw_request_bytes)
 
         time.sleep(self.post_send_delay)
@@ -161,8 +159,7 @@ class UDSClient:
             # ECU Reset always reverts session and security level to default/locked
             print(f"State Update: ECU Reset acknowledged. Resetting session and security level to default/locked.")
             self.current_session = SessionLevel.DEFAULT
-            self.security_level = SecurityLevel.LOCKED
-            # Note: Server performs reset AFTER sending response. Connection likely lost.
+            self.security_level = SecurityLevel.LOCKED 
 
 
     # --- Service-specific public methods ---
@@ -187,8 +184,7 @@ class UDSClient:
                 # Disconnect transport cleanly from client side.
                 print("Disconnecting transport due to expected ECU reset...")
                 self.disconnect() # Resets state to DEFAULT/LOCKED internally
-
-                # Optional: Add a delay before allowing reconnection attempt
+ 
                 print("Waiting briefly for ECU to reset...")
                 time.sleep(3.0) # Adjust delay as needed for target ECU
 
@@ -201,16 +197,15 @@ class UDSClient:
                     # State is already reset by disconnect()
                     raise ConnectionError("Failed to reconnect after ECU reset") from recon_e
 
-            return response # Return the original response (positive or negative)
+            return response 
 
         except TimeoutError as e:
             print("ECU Reset timed out. Server might have reset without responding.")
-            # Assume reset happened, disconnect and try reconnecting
             print("Disconnecting transport due to reset timeout...")
             self.disconnect() # Resets state to DEFAULT/LOCKED
 
             print("Waiting briefly assuming ECU reset...")
-            time.sleep(3.0) # Adjust delay
+            time.sleep(3.0) 
 
             print("Attempting to reconnect transport after reset timeout...")
             try:
@@ -265,4 +260,9 @@ class UDSClient:
         request.add_erase_parameters(address=address, size_kb=size_kb)
         effective_timeout = timeout if timeout is not None else self.timeout * 5.0
         return self.send_request(request, timeout=effective_timeout)
+
+    def read_data_by_id(self, data_identifier: int, timeout: float | None = None) -> UDSResponse:
+        """Sends a Read Data By ID (0x22) request."""
+        request = ReadDataByIDRequest(data_identifier=data_identifier)
+        return self.send_request(request, timeout=timeout)
 

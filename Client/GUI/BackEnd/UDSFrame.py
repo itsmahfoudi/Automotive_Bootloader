@@ -9,8 +9,13 @@ class UDSFrame:
         self.data = data # Payload (sub-function and parameters)
 
     def build_frame(self) -> bytes:
-        """Constructs the raw byte sequence for the frame."""
-        return bytes([self.service_id]) + self.data
+        """Constructs the raw byte sequence for the frame, padded to 8 bytes"""
+        payload = bytes([self.service_id]) + self.data
+        # Pad to 8 bytes if smaller
+        if len(payload) < 8:
+            padding = b'\xFF' * (8 - len(payload))
+            payload += padding
+        return payload
 
     @classmethod
     def parse_frame(cls, raw_frame: bytes):
